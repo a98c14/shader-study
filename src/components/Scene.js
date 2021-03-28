@@ -7,17 +7,49 @@ import { useRef } from "react";
 import { useControls } from "leva";
 
 function Controls({ material }) {
-    const { bigWaveElevation, bigWaveFrequency } = useControls({
-        bigWaveElevation: { value: 0.2, min: 0.01, max: 0.5, step: 0.01 },
-        bigWaveFrequency: { value: [1, 1], x: { min: 0.1, max: 10 }, y: { min: 0.1, max: 10 } },
+    const {
+        bigWaveElevation,
+        bigWaveFrequency,
+        bigWaveSpeed,
+        surfaceColor,
+        depthColor,
+        colorOffset,
+        colorMultiplier,
+        smallWaveElevation,
+        smallWaveFrequency,
+        smallWaveSpeed,
+        smallWaveCount,
+    } = useControls({
+        bigWaveElevation: { value: 0.81, min: 0.01, max: 2, step: 0.01 },
+        bigWaveFrequency: { value: [0.4, 0.8], x: { min: 0.1, max: 10 }, y: { min: 0.1, max: 10 } },
+        bigWaveSpeed: { value: 1.14, min: 0.01, max: 10, step: 0.01 },
+        surfaceColor: { value: "#9bd8ff", label: "Surface Color" },
+        depthColor: "#186691",
+        colorOffset: { value: -0.38, min: -1.0, max: 1.0 },
+        colorMultiplier: { value: 2.5, min: 0.1, max: 10.0 },
+        smallWaveElevation: { value: 0.49, min: 0.01, max: 2, step: 0.01 },
+        smallWaveFrequency: { value: 1.12, min: 0.01, max: 2, step: 0.01 },
+        smallWaveSpeed: { value: 0.69, min: 0.01, max: 10, step: 0.01 },
+        smallWaveCount: { value: 5.0, min: 1.0, max: 10.0, step: 1.0 },
     });
 
     if (material.current) {
+        console.log(surfaceColor);
         material.current.uniforms.uBigWavesElevation.value = bigWaveElevation;
         material.current.uniforms.uBigWavesFrequency.value.x = bigWaveFrequency[0];
         material.current.uniforms.uBigWavesFrequency.value.y = bigWaveFrequency[1];
+        material.current.uniforms.uBigWavesSpeed.value = bigWaveSpeed;
+        material.current.uniforms.uDepthColor.value.set(depthColor);
+        material.current.uniforms.uSurfaceColor.value.set(surfaceColor);
+        material.current.uniforms.uColorOffset.value = colorOffset;
+        material.current.uniforms.uColorMultiplier.value = colorMultiplier;
+        material.current.uniforms.uSmallWavesElevation.value = smallWaveElevation;
+        material.current.uniforms.uSmallWavesFrequency.value = smallWaveFrequency;
+        material.current.uniforms.uSmallWavesSpeed.value = smallWaveSpeed;
+        material.current.uniforms.uSmallWaveCount.value = smallWaveCount;
     }
-    return null;
+
+    return <></>;
 }
 
 function WavePlane({ uniforms }) {
@@ -28,16 +60,9 @@ function WavePlane({ uniforms }) {
     });
 
     return (
-        <mesh rotation={[Math.PI, 0, 0]}>
-            <planeBufferGeometry args={[4, 4, 128, 128]} />
-            <shaderMaterial
-                side={THREE.DoubleSide}
-                ref={mat}
-                wireframe
-                uniforms={uniforms}
-                fragmentShader={frag}
-                vertexShader={vert}
-            />
+        <mesh scale={[4, 4, 4]} rotation={[0, 0, 0]}>
+            <planeBufferGeometry args={[8, 8, 512, 512]} />
+            <shaderMaterial ref={mat} uniforms={uniforms} fragmentShader={frag} vertexShader={vert} />
             <Controls material={mat} />
         </mesh>
     );
@@ -50,8 +75,17 @@ export default function Scene() {
     const uniforms = {
         sampleTex: { value: texture },
         uTime: { value: 0.0 },
-        uBigWavesElevation: { value: 0.2 },
-        uBigWavesFrequency: { value: new THREE.Vector2(4, 1.5) },
+        uBigWavesElevation: { value: 0.81 },
+        uBigWavesFrequency: { value: new THREE.Vector2(0.4, 0.8) },
+        uBigWavesSpeed: { value: 1.14 },
+        uSmallWavesElevation: { value: 0.49 },
+        uSmallWavesFrequency: { value: 1.12 },
+        uSmallWavesSpeed: { value: 0.69 },
+        uDepthColor: { value: new THREE.Color("#186691") },
+        uSurfaceColor: { value: new THREE.Color("#9bd8ff") },
+        uColorOffset: { value: -0.38 },
+        uColorMultiplier: { value: 2.5 },
+        uSmallWaveCount: { value: 5.0 },
     };
 
     return <WavePlane uniforms={uniforms} />;
